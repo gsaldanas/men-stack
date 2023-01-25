@@ -1,8 +1,6 @@
 import chalk from "chalk";
 import express from "express";
-import { ObjectId } from "mongodb";
-import { connect } from "./db/db.js";
-import { movieClient } from "./db/collections.js";
+import mongoose from "mongoose";
 
 //variables
 const app = express();
@@ -17,7 +15,15 @@ app.use(express.json());
 // GET /api/v1/movies
 app.get(endpoint, async (req, res) => {
   try {
+    const { title } = req.query;
     const movies = await movieClient.find({}).toArray();
+    if (title) {
+      //check if movie title exist
+      const filteredMovie = movies.filter((movie) => movie.title === title);
+      console.log(filteredMovie);
+      //return the movie
+      return res.status(200).json(filteredMovie);
+    }
     res.status(200).json(movies);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -39,11 +45,12 @@ app.get(`${endpoint}/:id`, async (req, res) => {
 // POST /api/v1/movies
 app.post(endpoint, async (req, res) => {
   try {
-    const { title, release, actors } = req.body;
+    const { title, releaseYear, actors, poster } = req.body;
     const result = await movieClient.insertOne({
-      title: title,
-      release: release,
-      actors: actors,
+      title,
+      releaseYear,
+      actors,
+      poster,
     });
     res.status(201).json(result);
   } catch (error) {
@@ -82,7 +89,7 @@ app.delete(`${endpoint}/:id`, async (req, res) => {
 
 (async () => {
   try {
-    await connect();
+    await mongoose.connect("mongodb://0.0.0.0:27017/syntra");
     app.listen(port, () =>
       console.log(chalk.bgGreen.bold(`http://localhost:${port}✅`))
     );
