@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-new mongoose.Schema({
+//use a variable
+const movieSchema = new mongoose.Schema({
   title: {
     type: String,
     lowercase: true,
@@ -19,3 +20,6 @@ new mongoose.Schema({
     required: true,
   },
 });
+
+const Movie = mongoose.model("Movie", movieSchema);
+export default Movie;
